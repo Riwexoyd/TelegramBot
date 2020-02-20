@@ -29,10 +29,17 @@ namespace AspNetCoreTelegramBot
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
             // добавляем контекст ApplicationContext в качестве сервиса в приложение
             services.AddDbContext<ApplicationContext>(options =>
-                options.UseNpgsql(GetHerokuConnection()));
+                options.UseNpgsql(GetConnectionString()));
+
+            var token = Configuration.GetValue<string>("TOKEN");
+
+            if (string.IsNullOrEmpty(token))
+            {
+                throw new ArgumentNullException("Invalid TOKEN");
+            }
 
             //  регистрируем сервисы
-            services.AddSingleton<ITelegramBotClient, TelegramBotClient>();
+            services.AddSingleton<ITelegramBotClient>(i => new TelegramBotClient(token));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -61,21 +68,31 @@ namespace AspNetCoreTelegramBot
                 endpoints.MapControllers();
             });
 
-            string url = string.Empty;
             //  регистрируем бота
-            string hook = string.Format(url, "api/message/update");
+
+            string domain = Configuration.GetValue<string>("DOMAIN");
+
+            if (string.IsNullOrEmpty(domain))
+            {
+                throw new ArgumentNullException("Invalid DOMAIN");
+            }
+
+            string hook = $"{domain}api/message/update";
             telegramBot.SetWebhookAsync(hook).Wait();
         }
 
-        public string GetHerokuConnection()
+        public string GetConnectionString()
         {
-            // Heroku provides PostgreSQL connection URL via env variable
+            var connectionUrl = Configuration.GetValue<string>("DATABASE_URL");
+            if (string.IsNullOrEmpty(connectionUrl))
+            {
+                throw new ArgumentNullException("Invalid DATABASE_URL");
+            }
 
-            var connUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
             // Parse connection URL to connection string for Npgsql
-            connUrl = connUrl.Replace("postgres://", string.Empty);
-            var pgUserPass = connUrl.Split("@")[0];
-            var pgHostPortDb = connUrl.Split("@")[1];
+            connectionUrl = connectionUrl.Replace("postgres://", string.Empty);
+            var pgUserPass = connectionUrl.Split("@")[0];
+            var pgHostPortDb = connectionUrl.Split("@")[1];
             var pgHostPort = pgHostPortDb.Split("/")[0];
             var pgDb = pgHostPortDb.Split("/")[1];
             var pgUser = pgUserPass.Split(":")[0];
