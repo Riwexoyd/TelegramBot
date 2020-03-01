@@ -23,14 +23,16 @@ namespace AspNetCoreTelegramBot.Helpers
         }
 
         /// <summary>
-        /// Получение коллекции типов имплементации
+        /// Получить список классов-наследников, не являющихся абстрактными классами или интерфейсами
         /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
+        /// <param name="type">Тип, наследников которого необходимо получить</param>
+        /// <returns>Список наследников типа</returns>
         public static ICollection<Type> GetImplimentationTypes(Type type)
         {
-            return Assembly.GetAssembly(type).GetTypes()
-                .Where(i => type.IsAssignableFrom(i) && i != type).ToList();
+            return Assembly.GetAssembly(type)
+                .GetTypes()
+                .Where(i => type.IsAssignableFrom(i) && i != type && !i.IsAbstract && !i.IsInterface)
+                .ToList();
         }
     }
 }

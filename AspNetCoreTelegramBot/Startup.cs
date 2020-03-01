@@ -1,6 +1,5 @@
-﻿using System;
-
-using AspNetCoreTelegramBot.Database;
+﻿using AspNetCoreTelegramBot.Database;
+using AspNetCoreTelegramBot.Services;
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -9,6 +8,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
+using MihaZupan;
+
+using System;
 
 using Telegram.Bot;
 
@@ -27,6 +30,10 @@ namespace AspNetCoreTelegramBot
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+            services
+               .AddControllers()
+               .AddNewtonsoftJson();
+
             // добавляем контекст ApplicationContext в качестве сервиса в приложение
             services.AddDbContext<ApplicationContext>(options =>
                 options.UseNpgsql(GetConnectionString()));
@@ -39,7 +46,13 @@ namespace AspNetCoreTelegramBot
             }
 
             //  регистрируем сервисы
+#if DEBUG
+            //  TODO: настроить ngrok
+            services.AddSingleton<ITelegramBotClient>(i => new TelegramBotClient(token, new HttpToSocks5Proxy("127.0.0.1", 8443)));
+#else
             services.AddSingleton<ITelegramBotClient>(i => new TelegramBotClient(token));
+#endif
+            services.AddSingleton<ITelegramBotService, TelegramBotService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -54,31 +67,26 @@ namespace AspNetCoreTelegramBot
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
-            app.UseStaticFiles();
-
             app.UseRouting();
             app.UseCors();
-
-            app.UseAuthentication();
-            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+#if RELEASE
 
-            //  регистрируем бота
-
-            string domain = Configuration.GetValue<string>("DOMAIN");
-
+            //  регистрируем бота и устанавливаем webhook
+            //  TODO: настроить ngrok
+            var domain = Configuration.GetValue<string>("DOMAIN");
             if (string.IsNullOrEmpty(domain))
             {
                 throw new ArgumentNullException("Invalid DOMAIN");
             }
 
-            string hook = $"{domain}api/message/update";
+            string hook = $"{domain}/api/message";
             telegramBot.SetWebhookAsync(hook).Wait();
+#endif
         }
 
         public string GetConnectionString()
