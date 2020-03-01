@@ -1,0 +1,52 @@
+﻿@model AspNetCoreTelegramBot.ViewModels.LoginModel
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Вход на сайт</title>
+</head>
+
+<body>
+    <form asp-action="Login" asp-controller="Account" asp-anti-forgery="true" method="post">
+        <div class="validation" asp-validation-summary="ModelOnly"></div>
+        <div>
+            <div class="form-group">
+                <label asp-for="Login">Введите Login</label>
+                <input id="Login" type="text" asp-for="Login" />
+                <span asp-validation-for="Login"> </span>
+            </div>
+            <div class="form-group">
+                <input type="button" value="Отправить код" class="btn btn-outline-dark" onclick="sendCode()" />
+            </div>
+            <div id="code-button" style="visibility:hidden">
+                <div class="form-group">
+                    <label asp-for="Code">Введите код</label>
+                    <input asp-for="Code" />
+                    <span asp-validation-for="Code"></span>
+                </div>
+                <div class="form-group">
+                    <input type="submit" value="Войти" class="btn btn-outline-dark" />
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <script>
+        async function sendCode() {
+            let login = document.getElementById('Login').value;
+            const response = await fetch("/Account/SendCode/?login=" + login, {
+                method: "GET",
+                headers: { "Accept": "application/json" }
+            });
+            if (response && response.ok === true) {
+                const data = await response.json();
+                if (data === true) {
+                    let codeButton = document.getElementById('code-button');
+                    codeButton.style.visibility = "visible";
+                }
+            }
+        }
+    </script>
+</body>
+</html>

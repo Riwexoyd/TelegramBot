@@ -2,12 +2,14 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 using Telegram.Bot.Types.Enums;
 
 namespace AspNetCoreTelegramBot.Models
 {
-    public class Chat
+    public class Chat : IEquatable<Chat>
     {
         public int Id { get; set; }
 
@@ -26,6 +28,33 @@ namespace AspNetCoreTelegramBot.Models
         public ChatType TelegramChatType { get; set; }
 
         public DateTime RegisterDate { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Chat);
+        }
+
+        public bool Equals([AllowNull] Chat other)
+        {
+            return other != null &&
+                   Id == other.Id &&
+                   TelegramId == other.TelegramId;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Id, TelegramId);
+        }
+
+        public static bool operator ==(Chat left, Chat right)
+        {
+            return EqualityComparer<Chat>.Default.Equals(left, right);
+        }
+
+        public static bool operator !=(Chat left, Chat right)
+        {
+            return !(left == right);
+        }
     }
 
     public class ChatConfiguration : IEntityTypeConfiguration<Chat>

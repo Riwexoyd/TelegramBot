@@ -2,10 +2,12 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace AspNetCoreTelegramBot.Models
 {
-    public class User
+    public class User : IEquatable<User>
     {
         public int Id { get; set; }
 
@@ -18,6 +20,35 @@ namespace AspNetCoreTelegramBot.Models
         public string Username { get; set; }
 
         public DateTime RegisterDate { get; set; }
+
+        public string Login { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as User);
+        }
+
+        public bool Equals([AllowNull] User other)
+        {
+            return other != null &&
+                   Id == other.Id &&
+                   TelegramId == other.TelegramId;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Id, TelegramId);
+        }
+
+        public static bool operator ==(User left, User right)
+        {
+            return EqualityComparer<User>.Default.Equals(left, right);
+        }
+
+        public static bool operator !=(User left, User right)
+        {
+            return !(left == right);
+        }
     }
 
     public class UserConfiguration : IEntityTypeConfiguration<User>
@@ -30,6 +61,8 @@ namespace AspNetCoreTelegramBot.Models
             builder.Property(i => i.RegisterDate)
                 .ValueGeneratedOnAdd()
                 .HasDefaultValueSql("now()");
+            builder.HasIndex(i => i.Login)
+                .IsUnique(true);
         }
     }
 }
