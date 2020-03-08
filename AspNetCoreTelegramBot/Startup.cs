@@ -1,6 +1,7 @@
 ﻿using AspNetCoreTelegramBot.Database;
 using AspNetCoreTelegramBot.Services;
 
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -30,9 +31,15 @@ namespace AspNetCoreTelegramBot
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
-            services
-               .AddControllers()
-               .AddNewtonsoftJson();
+
+            // установка конфигурации подключения
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options => //CookieAuthenticationOptions
+                {
+                    options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
+                });
+            services.AddControllersWithViews()
+                .AddNewtonsoftJson();
 
             // добавляем контекст ApplicationContext в качестве сервиса в приложение
             services.AddDbContext<ApplicationContext>(options =>
@@ -48,11 +55,12 @@ namespace AspNetCoreTelegramBot
             //  регистрируем сервисы
 #if DEBUG
             //  TODO: настроить ngrok
-            services.AddSingleton<ITelegramBotClient>(i => new TelegramBotClient(token, new HttpToSocks5Proxy("127.0.0.1", 8443)));
+            services.AddSingleton<ITelegramBotClient>(i => new TelegramBotClient(token, new HttpToSocks5Proxy("127.0.0.1", 9050)));
 #else
             services.AddSingleton<ITelegramBotClient>(i => new TelegramBotClient(token));
 #endif
             services.AddSingleton<ITelegramBotService, TelegramBotService>();
+            services.AddSingleton<IAuthService, AuthService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -67,12 +75,18 @@ namespace AspNetCoreTelegramBot
                 app.UseHsts();
             }
 
+            app.UseStaticFiles();
+
             app.UseRouting();
             app.UseCors();
 
+            app.UseAuthentication();    // аутентификация
+            app.UseAuthorization();     // авторизация
+
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints.MapControllerRoute(name: "default",
+                    pattern: "{controller=Home}/{action=Index}/{id?}");
             });
 #if RELEASE
 

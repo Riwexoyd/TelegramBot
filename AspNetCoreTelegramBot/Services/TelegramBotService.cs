@@ -1,5 +1,7 @@
 ﻿using AspNetCoreTelegramBot.Managers;
 
+using Microsoft.Extensions.Configuration;
+
 using Telegram.Bot;
 
 using TelegramUser = Telegram.Bot.Types.User;
@@ -14,11 +16,14 @@ namespace AspNetCoreTelegramBot.Services
 
         public ICommandManager CommandManager { get; }
 
-        public TelegramBotService(ITelegramBotClient telegramBotClient)
+        public IConfiguration Configuration { get; }
+
+        public TelegramBotService(ITelegramBotClient telegramBotClient, IConfiguration configuration)
         {
             TelegramBotClient = telegramBotClient;
             BotUser = telegramBotClient.GetMeAsync().Result;
             CommandManager = new CommandManager(this);
+            Configuration = configuration;
         }
     }
 }
