@@ -10,9 +10,9 @@ using Telegram.Bot.Types.Enums;
 namespace AspNetCoreTelegramBot.Commands
 {
     [CommandChatType(ChatType.Private)]
-    internal class RegCommand : Command
+    internal class LoginCommand : Command
     {
-        public RegCommand(ITelegramBotService telegramBotService) : base(telegramBotService)
+        public LoginCommand(ITelegramBotService telegramBotService) : base(telegramBotService)
         {
         }
 
