@@ -1,4 +1,5 @@
-﻿using AspNetCoreTelegramBot.Models;
+﻿using AspNetCoreTelegramBot.Helpers;
+using AspNetCoreTelegramBot.Models;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -32,6 +33,7 @@ namespace AspNetCoreTelegramBot.Database.Extensions
         /// <returns>Объект чата</returns>
         public static async Task<Chat> GetChatFromTelegramModel(this ApplicationContext applicationContext, TelegramChat telegramChat)
         {
+            ExceptionHelper.ThrowIfNull(telegramChat, "telegramChat");
             var chat = await applicationContext.FindChatByTelegramId(telegramChat.Id);
             if (chat == null)
             {

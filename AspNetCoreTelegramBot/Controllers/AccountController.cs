@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
+using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 
 namespace AspNetCoreTelegramBot.Controllers
@@ -23,14 +24,14 @@ namespace AspNetCoreTelegramBot.Controllers
     public class AccountController : Controller
     {
         private readonly ApplicationContext applicationContext;
-        private readonly ITelegramBotService telegramBotService;
         private readonly IAuthService authService;
+        private readonly ITelegramBotClient telegramBotClient;
 
-        public AccountController(ApplicationContext applicationContext, ITelegramBotService telegramBotService, IAuthService authService)
+        public AccountController(ApplicationContext applicationContext, IAuthService authService, ITelegramBotClient telegramBotClient)
         {
             this.applicationContext = applicationContext;
-            this.telegramBotService = telegramBotService;
             this.authService = authService;
+            this.telegramBotClient = telegramBotClient;
         }
 
         [HttpGet]
@@ -56,7 +57,7 @@ namespace AspNetCoreTelegramBot.Controllers
                 return Json(false);
             }
 
-            await telegramBotService.TelegramBotClient.SendTextMessageAsync(chat.TelegramId, $"Пароль для входа в панель управления: {code}.");
+            await telegramBotClient.SendTextMessageAsync(chat.TelegramId, $"Пароль для входа в панель управления: {code}.");
 
             return Json(true);
         }

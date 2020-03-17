@@ -1,33 +1,45 @@
 ﻿using AspNetCoreTelegramBot.Attributes;
 using AspNetCoreTelegramBot.Database;
 using AspNetCoreTelegramBot.Models;
-using AspNetCoreTelegramBot.Services;
+
+using Microsoft.Extensions.Configuration;
 
 using System.Threading.Tasks;
 
+using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 
 namespace AspNetCoreTelegramBot.Commands
 {
+    /// <summary>
+    /// Команда /login
+    /// </summary>
     [CommandChatType(ChatType.Private)]
-    internal class LoginCommand : Command
+    internal class LoginCommand : BotCommand
     {
-        public LoginCommand(ITelegramBotService telegramBotService) : base(telegramBotService)
+        private readonly IConfiguration configuration;
+
+        protected override ITelegramBotClient TelegramBotClient { get; }
+
+        protected override ApplicationContext ApplicationContext { get; }
+
+        public LoginCommand(IConfiguration configuration, ITelegramBotClient telegramBotClient, ApplicationContext applicationContext)
         {
+            this.configuration = configuration;
+            TelegramBotClient = telegramBotClient;
+            ApplicationContext = applicationContext;
         }
 
-        public override async Task ExecuteAsync(ApplicationContext applicationContext, User sender, Chat chat)
+        public override async Task ExecuteAsync(User sender, Chat chat)
         {
-            if (!string.IsNullOrEmpty(sender.Login))
-            {
-                await TelegramBotService.TelegramBotClient.SendTextMessageAsync(chat.TelegramId, $"Вы уже зарегистрированы.\nВаш логин: {sender.Login}.");
-            }
-            else
+            if (string.IsNullOrEmpty(sender.Login))
             {
                 sender.Login = sender.Username ?? $"user_{sender.Id}";
-                await applicationContext.SaveChangesAsync();
-                await TelegramBotService.TelegramBotClient.SendTextMessageAsync(chat.TelegramId, $"Вы успешно зарегистрированы.\nВаш логин для входа: {sender.Login}.");
+                await ApplicationContext.SaveChangesAsync();
             }
+
+            var domain = configuration.GetValue<string>("DOMAIN");
+            await TelegramBotClient.SendTextMessageAsync(chat.TelegramId, $"Ваш логин для входа: {sender.Login}.\nАдрес для входа в панель: {domain}");
         }
     }
 }
