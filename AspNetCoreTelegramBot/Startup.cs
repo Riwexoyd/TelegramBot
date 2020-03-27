@@ -27,9 +27,17 @@ namespace AspNetCoreTelegramBot
         /// </summary>
         public IConfiguration Configuration { get; }
 
+        /// <summary>
+        /// Логгер
+        /// </summary>
+        public NLog.Logger Logger { get; }
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
+
+            Logger = NLog.LogManager.LoadConfiguration("./Configuration/NLog.config")
+                .GetCurrentClassLogger();
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -51,6 +59,7 @@ namespace AspNetCoreTelegramBot
             services.AddDbContext<ApplicationContext>(options =>
                 options.UseNpgsql(GetConnectionString()));
 
+            Logger.Info("Setting token");
             var token = Configuration.GetValue<string>("TOKEN");
             ExceptionHelper.ThrowIfNullOrEmpty(token, "TOKEN");
 
@@ -92,6 +101,7 @@ namespace AspNetCoreTelegramBot
             });
 
             //  регистрируем бота и устанавливаем webhook
+            Logger.Info("Setting webhooks");
             var domain = Configuration.GetValue<string>("DOMAIN");
             ExceptionHelper.ThrowIfNullOrEmpty(domain, "DOMAIN");
 
