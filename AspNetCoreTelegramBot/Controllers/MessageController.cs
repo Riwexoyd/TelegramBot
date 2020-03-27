@@ -31,7 +31,7 @@ namespace AspNetCoreTelegramBot.Controllers
         [HttpGet]
         public string Get()
         {
-            return "Method GET unuvalable";
+            return "Method GET unavailable";
         }
 
         /// <summary>

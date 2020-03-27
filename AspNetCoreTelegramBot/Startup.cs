@@ -57,12 +57,7 @@ namespace AspNetCoreTelegramBot
             ExceptionHelper.ThrowIfNullOrEmpty(token, "TOKEN");
 
             //  регистрируем сервисы
-#if DEBUG
-            //  TODO: настроить ngrok
-            services.AddSingleton<ITelegramBotClient>(i => new TelegramBotClient(token, new HttpToSocks5Proxy("127.0.0.1", 9050)));
-#else
             services.AddSingleton<ITelegramBotClient>(i => new TelegramBotClient(token));
-#endif
             services.AddTransient<ITextHandlerService, TextHandlerService>();
             services.AddTransient<ICommandService, CommandService>();
             services.AddTransient<IUpdateService, UpdateService>();
@@ -97,16 +92,13 @@ namespace AspNetCoreTelegramBot
                 endpoints.MapControllerRoute(name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
-#if RELEASE
 
             //  регистрируем бота и устанавливаем webhook
-            //  TODO: настроить ngrok
             var domain = Configuration.GetValue<string>("DOMAIN");
             ExceptionHelper.ThrowIfNullOrEmpty(domain, "DOMAIN");
 
             string hook = $"{domain}/api/message";
             telegramBot.SetWebhookAsync(hook).Wait();
-#endif
         }
 
         /// <summary>
