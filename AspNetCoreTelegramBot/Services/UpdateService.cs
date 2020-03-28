@@ -1,13 +1,8 @@
-﻿using AspNetCoreTelegramBot.Database;
-using AspNetCoreTelegramBot.Database.Extensions;
-using AspNetCoreTelegramBot.Helpers;
-
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 using System;
 using System.Threading.Tasks;
 
-using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -18,24 +13,18 @@ namespace AspNetCoreTelegramBot.Services
     /// </summary>
     public class UpdateService : IUpdateService
     {
-        private readonly ApplicationContext applicationContext;
-        private readonly ITelegramBotClient telegramBotClient;
-        private readonly ICommandService commandService;
-        private readonly ITextHandlerService textHandlerService;
         private readonly ILogger<UpdateService> logger;
+        private readonly ICallbackQueryService callbackQueryService;
+        private readonly IMessageService messageHandlerService;
 
-        public UpdateService(ApplicationContext applicationContext,
-            ITelegramBotClient telegramBotClient,
-            ICommandService commandService,
-            ITextHandlerService textHandlerService,
-            ILogger<UpdateService> logger
+        public UpdateService(IMessageService messageHandlerService,
+            ILogger<UpdateService> logger,
+            ICallbackQueryService callbackQueryService
             )
         {
-            this.applicationContext = applicationContext;
-            this.telegramBotClient = telegramBotClient;
-            this.commandService = commandService;
-            this.textHandlerService = textHandlerService;
             this.logger = logger;
+            this.callbackQueryService = callbackQueryService;
+            this.messageHandlerService = messageHandlerService;
         }
 
         /// <summary>
@@ -50,11 +39,11 @@ namespace AspNetCoreTelegramBot.Services
                 //  операция в зависимости от типа обновления
                 Func<Task> execute = update.Type switch
                 {
-                    UpdateType.Message => () => CheckMessageAsync(update.Message),
-                    _ => () => Task.FromException(new NotSupportedException())
+                    UpdateType.Message => () => messageHandlerService.HandleMessageAsync(update.Message),
+                    UpdateType.CallbackQuery => () => callbackQueryService.HandleCallbackQueryAsync(update.CallbackQuery),
+                    _ => () => Task.FromException(new NotSupportedException($"Unknown Update Type: {update.Type}"))
                 };
-                //  инициализируем сервисы
-                await InitializeAsync();
+
                 //  пробуем обработать исключение
                 try
                 {
@@ -68,59 +57,6 @@ namespace AspNetCoreTelegramBot.Services
             else
             {
                 logger.LogWarning("Update was Null");
-            }
-        }
-
-        /// <summary>
-        /// Инициализировать необходимые сервисы
-        /// </summary>
-        /// <returns></returns>
-        private async Task InitializeAsync()
-        {
-            await commandService.InitializeAsync();
-        }
-
-        /// <summary>
-        /// Проверить сообщение
-        /// </summary>
-        /// <param name="message"></param>
-        /// <returns></returns>
-        private async Task CheckMessageAsync(Message message)
-        {
-            ExceptionHelper.ThrowIfNull(message, "message");
-            ExceptionHelper.ThrowIfNullOrEmpty(message.Text, "message.Text");
-
-            //  получаем отправителя и чат
-            var user = await applicationContext.GetUserFromTelegramModel(message.From);
-            var chat = await applicationContext.GetChatFromTelegramModel(message.Chat);
-
-            //  если проходит паттерн команды
-            if (commandService.IsCommand(message.Text))
-            {
-                if (commandService.ContainsCommand(message.Text))
-                {
-                    var command = commandService.GetCommand(message.Text);
-                    if (commandService.CanExecuteCommand(command, chat, out string errorMessage))
-                    {
-                        await command.ExecuteAsync(user, chat);
-                    }
-                    else
-                    {
-                        await telegramBotClient.SendTextMessageAsync(chat.TelegramId, errorMessage);
-                        throw new OperationCanceledException(errorMessage);
-                    }
-                }
-                else
-                {
-                    string unknownCommandMessage = $"Unknown command: {message.Text}";
-                    await telegramBotClient.SendTextMessageAsync(chat.TelegramId, unknownCommandMessage);
-                    throw new ArgumentException(unknownCommandMessage);
-                }
-            }
-            else
-            {
-                //  обрабатываем текст
-                await textHandlerService.HandleTextAsync(user, chat, message.Text);
             }
         }
     }

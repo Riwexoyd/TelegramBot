@@ -1,13 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace AspNetCoreTelegramBot.Models
 {
     /// <summary>
-    /// Таблица для отношения многие-ко-многим
+    /// Цитаты-ключевые слова
     /// </summary>
     public class QuoteKeyword : IEquatable<QuoteKeyword>
     {
@@ -56,25 +53,6 @@ namespace AspNetCoreTelegramBot.Models
         public static bool operator !=(QuoteKeyword left, QuoteKeyword right)
         {
             return !(left == right);
-        }
-    }
-
-    public class QuoteKeywordConfiguration : IEntityTypeConfiguration<QuoteKeyword>
-    {
-        public void Configure(EntityTypeBuilder<QuoteKeyword> builder)
-        {
-            builder
-                .HasKey(i => new { i.QuoteId, i.KeywordId });
-
-            builder
-                .HasOne(i => i.Quote)
-                .WithMany(i => i.QuoteKeywords)
-                .HasForeignKey(i => i.QuoteId);
-
-            builder
-                .HasOne(i => i.Keyword)
-                .WithMany(i => i.QuoteKeywords)
-                .HasForeignKey(i => i.KeywordId);
         }
     }
 }
