@@ -55,13 +55,20 @@ namespace AspNetCoreTelegramBot.Models
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {
-            builder.HasKey(i => i.Id);
-            builder.HasIndex(i => i.TelegramId)
+            builder
+                .HasKey(i => i.Id);
+
+            builder
+                .HasIndex(i => i.TelegramId)
                 .IsUnique(true);
-            builder.Property(i => i.RegisterDate)
+
+            builder
+                .Property(i => i.RegisterDate)
                 .ValueGeneratedOnAdd()
                 .HasDefaultValueSql("now()");
-            builder.HasIndex(i => i.Login)
+
+            builder
+                .HasIndex(i => i.Login)
                 .IsUnique(true);
         }
     }

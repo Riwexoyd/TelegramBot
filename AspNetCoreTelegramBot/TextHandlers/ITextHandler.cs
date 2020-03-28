@@ -11,6 +11,7 @@ namespace AspNetCoreTelegramBot.TextHandlers
     {
         /// <summary>
         /// Обработать текстовое сообщение
+        /// Лайфхак: вернуть false, чтобы остальные обработчики также его обработали
         /// </summary>
         /// <param name="sender">Отправитель</param>
         /// <param name="chat">Чат</param>
