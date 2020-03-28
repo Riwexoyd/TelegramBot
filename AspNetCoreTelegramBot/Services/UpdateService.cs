@@ -16,10 +16,10 @@ namespace AspNetCoreTelegramBot.Services
     /// </summary>
     public class UpdateService : IUpdateService
     {
-        private ApplicationContext applicationContext;
-        private ITelegramBotClient telegramBotClient;
-        private ICommandService commandService;
-        private ITextHandlerService textHandlerService;
+        private readonly ApplicationContext applicationContext;
+        private readonly ITelegramBotClient telegramBotClient;
+        private readonly ICommandService commandService;
+        private readonly ITextHandlerService textHandlerService;
 
         public UpdateService(ApplicationContext applicationContext,
             ITelegramBotClient telegramBotClient,
