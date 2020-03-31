@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -26,12 +27,14 @@ namespace AspNetCoreTelegramBot.Controllers
         private readonly ApplicationContext applicationContext;
         private readonly IAuthService authService;
         private readonly ITelegramBotClient telegramBotClient;
+        private readonly ILogger<AccountController> logger;
 
-        public AccountController(ApplicationContext applicationContext, IAuthService authService, ITelegramBotClient telegramBotClient)
+        public AccountController(ApplicationContext applicationContext, IAuthService authService, ITelegramBotClient telegramBotClient, ILogger<AccountController> logger)
         {
             this.applicationContext = applicationContext;
             this.authService = authService;
             this.telegramBotClient = telegramBotClient;
+            this.logger = logger;
         }
 
         [HttpGet]
@@ -75,6 +78,7 @@ namespace AspNetCoreTelegramBot.Controllers
                     {
                         await Authenticate(model.Login); // аутентификация
 
+                        logger.LogInformation($"User {model.Login} is log in");
                         return RedirectToAction("Index", "Home");
                     }
                     else

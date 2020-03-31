@@ -2,6 +2,8 @@
 using AspNetCoreTelegramBot.Database.Extensions;
 using AspNetCoreTelegramBot.Helpers;
 
+using Microsoft.Extensions.Logging;
+
 using System;
 using System.Threading.Tasks;
 
@@ -20,16 +22,20 @@ namespace AspNetCoreTelegramBot.Services
         private readonly ITelegramBotClient telegramBotClient;
         private readonly ICommandService commandService;
         private readonly ITextHandlerService textHandlerService;
+        private readonly ILogger<UpdateService> logger;
 
         public UpdateService(ApplicationContext applicationContext,
             ITelegramBotClient telegramBotClient,
             ICommandService commandService,
-            ITextHandlerService textHandlerService)
+            ITextHandlerService textHandlerService,
+            ILogger<UpdateService> logger
+            )
         {
             this.applicationContext = applicationContext;
             this.telegramBotClient = telegramBotClient;
             this.commandService = commandService;
             this.textHandlerService = textHandlerService;
+            this.logger = logger;
         }
 
         /// <summary>
@@ -56,14 +62,12 @@ namespace AspNetCoreTelegramBot.Services
                 }
                 catch (Exception e)
                 {
-                    //  TODO: сюда логгер
-                    Console.WriteLine(e.Message);
+                    logger.LogError(e.StackTrace);
                 }
             }
             else
             {
-                //  TODO: сюда тоже логгер
-                Console.WriteLine("Update IS NULL");
+                logger.LogWarning("Update was Null");
             }
         }
 

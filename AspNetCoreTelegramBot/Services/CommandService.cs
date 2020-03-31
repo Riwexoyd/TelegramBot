@@ -3,6 +3,8 @@ using AspNetCoreTelegramBot.Commands;
 using AspNetCoreTelegramBot.Helpers;
 using AspNetCoreTelegramBot.Models;
 
+using Microsoft.Extensions.Logging;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,25 +20,26 @@ namespace AspNetCoreTelegramBot.Services
         private const string CommandPostfix = "command";
         private readonly Dictionary<string, IBotCommand> commandDictionary;
         private readonly ITelegramBotClient telegramBotClient;
+        private readonly ILogger<CommandService> logger;
 
         private Regex commandRegex;
 
-        public CommandService(ITelegramBotClient telegramBotClient, IEnumerable<IBotCommand> commands)
+        public CommandService(ITelegramBotClient telegramBotClient, IEnumerable<IBotCommand> commands, ILogger<CommandService> logger)
         {
             this.telegramBotClient = telegramBotClient;
+            this.logger = logger;
 
             commandDictionary = commands.ToDictionary(i =>
             {
                 string name = i.GetType().Name.ToLower();
                 name = name.EndsWith(CommandPostfix) ? name.Remove(name.Length - CommandPostfix.Length) : name;
-                //  TODO: логгер
-                Console.WriteLine($"Command: {name}");
+
+                this.logger.LogInformation($"Command: {name}");
                 return name;
             },
             j => j);
 
-            //  TODO: логгер
-            Console.WriteLine($"Commands count: {commands.Count()}");
+            this.logger.LogInformation($"Commands count: {commands.Count()}");
         }
 
         public async Task InitializeAsync()
