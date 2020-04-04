@@ -7,11 +7,13 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
+using Telegram.Bot;
 using Telegram.Bot.Types.Enums;
 
 namespace AspNetCoreTelegramBot.Controllers
@@ -23,14 +25,16 @@ namespace AspNetCoreTelegramBot.Controllers
     public class AccountController : Controller
     {
         private readonly ApplicationContext applicationContext;
-        private readonly ITelegramBotService telegramBotService;
         private readonly IAuthService authService;
+        private readonly ITelegramBotClient telegramBotClient;
+        private readonly ILogger<AccountController> logger;
 
-        public AccountController(ApplicationContext applicationContext, ITelegramBotService telegramBotService, IAuthService authService)
+        public AccountController(ApplicationContext applicationContext, IAuthService authService, ITelegramBotClient telegramBotClient, ILogger<AccountController> logger)
         {
             this.applicationContext = applicationContext;
-            this.telegramBotService = telegramBotService;
             this.authService = authService;
+            this.telegramBotClient = telegramBotClient;
+            this.logger = logger;
         }
 
         [HttpGet]
@@ -56,7 +60,7 @@ namespace AspNetCoreTelegramBot.Controllers
                 return Json(false);
             }
 
-            await telegramBotService.TelegramBotClient.SendTextMessageAsync(chat.TelegramId, $"Пароль для входа в панель управления: {code}.");
+            await telegramBotClient.SendTextMessageAsync(chat.TelegramId, $"Пароль для входа в панель управления: {code}.");
 
             return Json(true);
         }
@@ -74,6 +78,7 @@ namespace AspNetCoreTelegramBot.Controllers
                     {
                         await Authenticate(model.Login); // аутентификация
 
+                        logger.LogInformation($"User {model.Login} is log in");
                         return RedirectToAction("Index", "Home");
                     }
                     else

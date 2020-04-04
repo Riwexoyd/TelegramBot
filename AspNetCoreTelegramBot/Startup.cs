@@ -1,5 +1,9 @@
-﻿using AspNetCoreTelegramBot.Database;
+﻿using AspNetCoreTelegramBot.CallbackQueries;
+using AspNetCoreTelegramBot.Commands;
+using AspNetCoreTelegramBot.Database;
+using AspNetCoreTelegramBot.Helpers;
 using AspNetCoreTelegramBot.Services;
+using AspNetCoreTelegramBot.TextHandlers;
 
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
@@ -10,22 +14,32 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-using MihaZupan;
-
-using System;
-
 using Telegram.Bot;
 
 namespace AspNetCoreTelegramBot
 {
+    /// <summary>
+    /// Стартап
+    /// </summary>
     public class Startup
     {
+        /// <summary>
+        /// Конфигурация
+        /// </summary>
+        public IConfiguration Configuration { get; }
+
+        /// <summary>
+        /// Логгер
+        /// </summary>
+        public NLog.Logger Logger { get; }
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-        }
 
-        public IConfiguration Configuration { get; }
+            Logger = NLog.LogManager.LoadConfiguration("./Configuration/NLog.config")
+                .GetCurrentClassLogger();
+        }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -38,6 +52,7 @@ namespace AspNetCoreTelegramBot
                 {
                     options.LoginPath = new Microsoft.AspNetCore.Http.PathString("/Account/Login");
                 });
+            //  добавляем контроллеры и вью
             services.AddControllersWithViews()
                 .AddNewtonsoftJson();
 
@@ -45,22 +60,22 @@ namespace AspNetCoreTelegramBot
             services.AddDbContext<ApplicationContext>(options =>
                 options.UseNpgsql(GetConnectionString()));
 
+            Logger.Info("Setting token");
             var token = Configuration.GetValue<string>("TOKEN");
-
-            if (string.IsNullOrEmpty(token))
-            {
-                throw new ArgumentNullException("Invalid TOKEN");
-            }
+            ExceptionHelper.ThrowIfNullOrEmpty(token, "TOKEN");
 
             //  регистрируем сервисы
-#if DEBUG
-            //  TODO: настроить ngrok
-            services.AddSingleton<ITelegramBotClient>(i => new TelegramBotClient(token, new HttpToSocks5Proxy("127.0.0.1", 9050)));
-#else
             services.AddSingleton<ITelegramBotClient>(i => new TelegramBotClient(token));
-#endif
-            services.AddSingleton<ITelegramBotService, TelegramBotService>();
+            services.AddTransient<ITextHandlerService, TextHandlerService>();
+            services.AddTransient<ICommandService, CommandService>();
+            services.AddTransient<IUpdateService, UpdateService>();
+            services.AddTransient<IMessageService, MessageService>();
+            services.AddTransient<ICallbackQueryService, CallbackQueryService>();
             services.AddSingleton<IAuthService, AuthService>();
+
+            RegisterAsTransient<IBotCommand>(services);
+            RegisterAsTransient<ITextHandler>(services);
+            RegisterAsTransient<ICallbackQuery>(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -88,28 +103,34 @@ namespace AspNetCoreTelegramBot
                 endpoints.MapControllerRoute(name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
-#if RELEASE
 
             //  регистрируем бота и устанавливаем webhook
-            //  TODO: настроить ngrok
+            Logger.Info("Setting webhooks");
             var domain = Configuration.GetValue<string>("DOMAIN");
-            if (string.IsNullOrEmpty(domain))
-            {
-                throw new ArgumentNullException("Invalid DOMAIN");
-            }
+            ExceptionHelper.ThrowIfNullOrEmpty(domain, "DOMAIN");
 
             string hook = $"{domain}/api/message";
             telegramBot.SetWebhookAsync(hook).Wait();
-#endif
         }
 
-        public string GetConnectionString()
+        /// <summary>
+        /// Зарегистрировать реализации типа как Transient
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="serviceCollection"></param>
+        private void RegisterAsTransient<T>(IServiceCollection serviceCollection)
+        {
+            var types = ReflectionHelper.GetImplimentationTypes(typeof(T));
+            foreach (var type in types)
+            {
+                serviceCollection.AddTransient(typeof(T), type);
+            }
+        }
+
+        private string GetConnectionString()
         {
             var connectionUrl = Configuration.GetValue<string>("DATABASE_URL");
-            if (string.IsNullOrEmpty(connectionUrl))
-            {
-                throw new ArgumentNullException("Invalid DATABASE_URL");
-            }
+            ExceptionHelper.ThrowIfNullOrEmpty(connectionUrl, "DATABASE_URL");
 
             // Parse connection URL to connection string for Npgsql
             connectionUrl = connectionUrl.Replace("postgres://", string.Empty);

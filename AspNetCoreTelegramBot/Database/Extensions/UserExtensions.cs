@@ -1,4 +1,5 @@
-﻿using AspNetCoreTelegramBot.Models;
+﻿using AspNetCoreTelegramBot.Helpers;
+using AspNetCoreTelegramBot.Models;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -32,6 +33,7 @@ namespace AspNetCoreTelegramBot.Database.Extensions
         /// <returns>Пользователь</returns>
         public static async Task<User> GetUserFromTelegramModel(this ApplicationContext applicationContext, TelegramUser telegramUser)
         {
+            ExceptionHelper.ThrowIfNull(telegramUser, "telegramUser");
             var user = await applicationContext.FindUserByTelegramId(telegramUser.Id);
             if (user == null)
             {

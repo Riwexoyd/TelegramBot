@@ -15,7 +15,8 @@ namespace AspNetCoreTelegramBot.Helpers
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static ICollection<T> GetInstance<T>()
+        [Obsolete("Использовать инъекцию зависимостей или сделать метод с возможностью передать аргументы в конструктор")]
+        public static IEnumerable<T> GetInstance<T>()
         {
             var type = typeof(T);
             var types = GetImplimentationTypes(type).Where(i => !i.IsAbstract && !i.IsInterface);
@@ -27,7 +28,7 @@ namespace AspNetCoreTelegramBot.Helpers
         /// </summary>
         /// <param name="type">Тип, наследников которого необходимо получить</param>
         /// <returns>Список наследников типа</returns>
-        public static ICollection<Type> GetImplimentationTypes(Type type)
+        public static IEnumerable<Type> GetImplimentationTypes(Type type)
         {
             return Assembly.GetAssembly(type)
                 .GetTypes()

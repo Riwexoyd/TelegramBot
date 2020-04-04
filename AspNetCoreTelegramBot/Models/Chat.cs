@@ -1,7 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
@@ -29,6 +26,19 @@ namespace AspNetCoreTelegramBot.Models
 
         public DateTime RegisterDate { get; set; }
 
+        public ICollection<UserChat> UserChats { get; set; }
+
+        /// <summary>
+        /// Чаты (для приватных категорий)
+        /// </summary>
+        public ICollection<RouletteCategoryChat> WinnerCategoryChats { get; set; }
+
+        public Chat()
+        {
+            UserChats = new List<UserChat>();
+            WinnerCategoryChats = new List<RouletteCategoryChat>();
+        }
+
         public override bool Equals(object obj)
         {
             return Equals(obj as Chat);
@@ -54,19 +64,6 @@ namespace AspNetCoreTelegramBot.Models
         public static bool operator !=(Chat left, Chat right)
         {
             return !(left == right);
-        }
-    }
-
-    public class ChatConfiguration : IEntityTypeConfiguration<Chat>
-    {
-        public void Configure(EntityTypeBuilder<Chat> builder)
-        {
-            builder.HasKey(i => i.Id);
-            builder.HasIndex(i => i.TelegramId)
-                .IsUnique(true);
-            builder.Property(i => i.RegisterDate)
-                .ValueGeneratedOnAdd()
-                .HasDefaultValueSql("now()");
         }
     }
 }

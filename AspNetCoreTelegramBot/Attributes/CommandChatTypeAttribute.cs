@@ -1,16 +1,28 @@
 ﻿using System;
-
+using System.Collections.Generic;
+using System.Linq;
 using Telegram.Bot.Types.Enums;
 
 namespace AspNetCoreTelegramBot.Attributes
 {
+    /// <summary>
+    /// Атрибут типа доступа к команде.
+    /// Добавить атрибут на класс команды, если необходимо ограничить тип чата.
+    /// </summary>
     public class CommandChatTypeAttribute : Attribute
     {
-        public ChatType ChatType { get; set; }
+        /// <summary>
+        /// Типы чата
+        /// </summary>
+        public ICollection<ChatType> ChatTypes { get; set; }
 
-        public CommandChatTypeAttribute(ChatType chatType)
+        /// <summary>
+        /// Конструктор атрибута
+        /// </summary>
+        /// <param name="chatType">Тип чата</param>
+        public CommandChatTypeAttribute(params ChatType[] chatTypes)
         {
-            ChatType = chatType;
+            ChatTypes = chatTypes.ToList();
         }
     }
 }
