@@ -1,7 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace AspNetCoreTelegramBot.Models
@@ -39,20 +36,6 @@ namespace AspNetCoreTelegramBot.Models
         public Quote()
         {
             QuoteKeywords = new List<QuoteKeyword>();
-        }
-    }
-
-    public class QuoteConfiguration : IEntityTypeConfiguration<Quote>
-    {
-        public void Configure(EntityTypeBuilder<Quote> builder)
-        {
-            builder
-                .HasKey(i => i.Id);
-
-            builder
-                .Property(i => i.CreationDate)
-                .ValueGeneratedOnAdd()
-                .HasDefaultValueSql("now()");
         }
     }
 }

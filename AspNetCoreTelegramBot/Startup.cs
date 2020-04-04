@@ -1,4 +1,5 @@
-﻿using AspNetCoreTelegramBot.Commands;
+﻿using AspNetCoreTelegramBot.CallbackQueries;
+using AspNetCoreTelegramBot.Commands;
 using AspNetCoreTelegramBot.Database;
 using AspNetCoreTelegramBot.Helpers;
 using AspNetCoreTelegramBot.Services;
@@ -68,10 +69,13 @@ namespace AspNetCoreTelegramBot
             services.AddTransient<ITextHandlerService, TextHandlerService>();
             services.AddTransient<ICommandService, CommandService>();
             services.AddTransient<IUpdateService, UpdateService>();
+            services.AddTransient<IMessageService, MessageService>();
+            services.AddTransient<ICallbackQueryService, CallbackQueryService>();
             services.AddSingleton<IAuthService, AuthService>();
 
             RegisterAsTransient<IBotCommand>(services);
             RegisterAsTransient<ITextHandler>(services);
+            RegisterAsTransient<ICallbackQuery>(services);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

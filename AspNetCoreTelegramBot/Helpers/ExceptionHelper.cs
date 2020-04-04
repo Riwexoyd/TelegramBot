@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace AspNetCoreTelegramBot.Helpers
 {
@@ -30,6 +31,32 @@ namespace AspNetCoreTelegramBot.Helpers
             if (obj == null)
             {
                 throw new ArgumentNullException($"{name} is null");
+            }
+        }
+
+        /// <summary>
+        /// Проверка объекта на указанный тип
+        /// </summary>
+        /// <typeparam name="T">Тип объекта</typeparam>
+        /// <param name="obj">Объект</param>
+        public static void ThrowIfNotType<T>(object obj, string name)
+        {
+            if (!(obj is T))
+            {
+                throw new ArgumentException($"Object {name} is not type {typeof(T).Name}");
+            }
+        }
+
+        /// <summary>
+        /// Проверка на наличие ключа в дикшенери
+        /// </summary>
+        /// <param name="dictionary">Коллекция</param>
+        /// <param name="key">Ключ</param>
+        public static void ThrowIfNotContains(Dictionary<string, object> dictionary, string name, string key)
+        {
+            if (!dictionary.ContainsKey(key))
+            {
+                throw new ArgumentException($"Dictionary {name} is not contains key: {key}");
             }
         }
     }

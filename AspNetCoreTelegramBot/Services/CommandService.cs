@@ -3,8 +3,6 @@ using AspNetCoreTelegramBot.Commands;
 using AspNetCoreTelegramBot.Helpers;
 using AspNetCoreTelegramBot.Models;
 
-using Microsoft.Extensions.Logging;
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,33 +18,27 @@ namespace AspNetCoreTelegramBot.Services
         private const string CommandPostfix = "command";
         private readonly Dictionary<string, IBotCommand> commandDictionary;
         private readonly ITelegramBotClient telegramBotClient;
-        private readonly ILogger<CommandService> logger;
 
         private Regex commandRegex;
 
-        public CommandService(ITelegramBotClient telegramBotClient, IEnumerable<IBotCommand> commands, ILogger<CommandService> logger)
+        public CommandService(ITelegramBotClient telegramBotClient, IEnumerable<IBotCommand> commands)
         {
             this.telegramBotClient = telegramBotClient;
-            this.logger = logger;
 
             commandDictionary = commands.ToDictionary(i =>
             {
                 string name = i.GetType().Name.ToLower();
                 name = name.EndsWith(CommandPostfix) ? name.Remove(name.Length - CommandPostfix.Length) : name;
-
-                this.logger.LogInformation($"Command: {name}");
                 return name;
             },
             j => j);
-
-            this.logger.LogInformation($"Commands count: {commands.Count()}");
         }
 
         public async Task InitializeAsync()
         {
             var bot = await telegramBotClient.GetMeAsync();
             //  TODO: переписать регекс
-            commandRegex = new Regex($@"(^(\/)[a-z]+@{bot.Username})|(^(\/)[a-z]*$)");
+            commandRegex = new Regex($@"^\/[A-Za-z]+(@{bot.Username})?", RegexOptions.IgnoreCase);
         }
 
         public bool ContainsCommand(string command)
@@ -67,7 +59,7 @@ namespace AspNetCoreTelegramBot.Services
 
         private string ParseCommand(string command)
         {
-            return command.Split('@').First().Substring(1);
+            return command.ToLower().Split('@').First().Substring(1);
         }
 
         /// <summary>
@@ -78,7 +70,7 @@ namespace AspNetCoreTelegramBot.Services
         public bool IsCommand(string command)
         {
             ExceptionHelper.ThrowIfNull(commandRegex, "commandRegex");
-            return commandRegex.IsMatch(command);
+            return commandRegex.IsMatch(command.ToLower());
         }
 
         /// <summary>
@@ -93,7 +85,7 @@ namespace AspNetCoreTelegramBot.Services
             var attributes = command.GetType().GetCustomAttributes(false);
             foreach (CommandChatTypeAttribute commandChatType in attributes)
             {
-                if (commandChatType.ChatType != chat.TelegramChatType)
+                if (commandChatType.ChatTypes.All(i => i != chat.TelegramChatType))
                 {
                     //  TODO: уточнить, где команду можно применять
                     errorMessage = "Данную команду нельзя использовать в этом чате";
