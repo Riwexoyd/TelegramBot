@@ -1,0 +1,48 @@
+﻿.quote-tag {
+    border-radius: 15px;
+    background-color: paleturquoise;
+    margin-left: 15px;
+    text-align: center;
+}
+
+.quote-tags-add {
+    margin-left:15px;
+}
+
+.quote-tags-add:hover {
+   color: #009900;
+   cursor:pointer;
+}
+
+.quote-main{
+    margin-top: 15px;
+}
+
+.add-tag input {
+    font-size: 0.5em;
+}
+
+.card-container:hover .delete-container div .delete-quote {
+    display: block;
+}
+
+.delete-quote {
+    display:none;
+}
+
+.delete-quote:hover i {
+    color:#990000;
+    cursor:pointer;
+}
+
+.quote-tags-add{
+    display:none;
+}
+
+.add-tag{
+    display:none;
+}
+
+.card-container:hover .quote-tags-add {
+    display: block;
+}

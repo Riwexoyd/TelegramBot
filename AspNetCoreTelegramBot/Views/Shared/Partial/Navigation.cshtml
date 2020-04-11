@@ -1,0 +1,53 @@
+﻿<link rel="stylesheet" href="~/css/Partial/Navigation.css" runat="server" />
+
+
+<nav class="sidebar-sticky bg-dark navbar-dark navbar-expand-md">
+    <a href="Home" class="logo navbar-brand">Телеграмм бот</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Открыть навигацию">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto flex-column">
+            <li class="nav-item active">
+                <div class="row">
+                    <div class="col-3 pr-1 ml-1"  onclick="onIconClick(this)">
+                        <i class="far fa-user-circle fa-2x"></i>
+                    </div>
+                    <div class="col-8 pl-1 pr-1" >
+                        <a href="User" class="nav-link text-left">Пользователь</a>
+                    </div>
+                </div>
+            </li>
+            <li class="nav-item">
+                <div class="row">
+                    <div class="col-3 pr-1 ml-1" onclick="onIconClick(this)">
+                        <i class="fas far fa-bars fa-2x"></i>
+                    </div>
+                    <div class="col-8 pl-1">
+                        <a href="Quotes" class="nav-link">Цитаты</a>
+                    </div>
+                </div>
+
+            </li>
+            <li class="nav-item">
+                <div class="row">
+                    <div class="col-3 pr-1 ml-1" onclick="onIconClick(this)">
+                        <i class="far fa-sun fa-2x"></i>
+                    </div>
+                    <div class="col-8 pl-1">
+                        <a href="Settings" class="nav-link">Настройки</a>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<script>
+    function onIconClick(elem) {
+        console.log(elem);
+        let url = elem.parentElement.querySelector("a").href;
+        document.location.href = url;
+    }
+</script>

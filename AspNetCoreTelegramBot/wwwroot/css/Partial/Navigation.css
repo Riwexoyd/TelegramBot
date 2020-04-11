@@ -1,0 +1,29 @@
+﻿
+
+
+.nav-item{
+    padding-top:15px;
+    padding-bottom:15px;
+}
+
+.nav-item .row {
+    font-size: 0.8em;
+}
+
+.nav-item .row .col-3:first-child {
+   margin-top: 6px;
+}
+
+.nav-item .row:first-child:hover {
+    color:brown;
+    cursor:pointer;
+}
+
+.nav-item .row:first-child:hover div a {
+    color:rgba(255,255,255,.75);
+}
+
+nav {
+    height: 100%;
+}
+

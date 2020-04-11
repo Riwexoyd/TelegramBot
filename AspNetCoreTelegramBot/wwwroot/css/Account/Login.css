@@ -1,0 +1,16 @@
+﻿#code-button{
+    display:none;
+}
+
+body {
+    font-size: 1em;
+    background-color: #f4f4f4;
+}
+
+.form-control {
+    width: 50%;
+}
+
+.hide-button{
+    width:100%;
+}

@@ -1,0 +1,184 @@
+﻿
+<link rel="stylesheet" href="~/css/Quotes/Index.css" runat="server" />
+
+@{
+    Layout = "_Layout";
+}
+
+<head>
+    <title>Цитаты</title>
+</head>
+
+@model AspNetCoreTelegramBot.ViewModels.QuoteModel
+<div class="main">
+    <h1>Цитаты</h1>
+    <div class="add-block">
+        <form asp-action="AddQuote" asp-controller="Quotes" method="post">
+            <div class="row">
+                <div class="col-8">
+                    <input asp-for="Text" class="form-control" placeholder="Введите цитату">
+                </div>
+                <div class="col-4">
+                    <input type="submit" class="btn btn-outline-dark" value="Добавить">
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+
+    
+
+
+</script>
+
+@if (ViewBag.Quotes != null)
+{
+    foreach (var quote in ViewBag.Quotes)
+    {
+<div class="card-container row">
+    <div class="quote-main card col-11">
+        <div class="quote-text" onmouseover="showCloseIcon()">
+            <input type="hidden" value="@quote.Id" />     
+            <h2 class="quote-text-content">@quote.Text</h2>
+        </div>
+        <div class="quote-tags">
+            <div class="row ml-0 mb-1">
+                @foreach (string tag in (IEnumerable<string>)quote.Tags)
+                {
+                    <div class="col-auto quote-tag">
+                        <a>@tag</a>
+                    </div>
+                }
+                <div onclick="showQuote()" class="quote-tags-add">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="add-tag ml-3">
+                    <input class="form-control" type="text" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="delete-container col-1 pl-2">
+        <div class="mr-0 mt-1">
+            <div class="delete-quote" onclick="deleteQuote()">
+                <i class="fas fa-times"></i>
+            </div>
+        </div>
+    </div>
+</div>
+    }
+}
+else
+{
+    <h2>Пока ничего нет :(</h2>
+}
+
+
+<script>
+
+    let isFirstClick = true;
+
+    function showQuote() {
+        console.log("quote showed");
+        let add = document.querySelector(".add-tag");
+        add.style.display = "block";
+        add.focus();
+
+        let plus = document.querySelector(".quote-tags-add");
+        plus.style.display = "none";
+
+    }
+
+    function deleteQuote() {
+
+        let quoteNode = document.querySelector(".quote-main");
+        let quote = quoteNode.firstChild.value;
+
+        let responce = fetch("Quotes/DeleteQuote", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: { id: quote }
+        }).then(val => {
+
+            quoteNode.remove();
+            console.log(val);
+
+        }).catch(err => {
+
+            console.log(err);
+        })
+    }
+
+    function hideQuote() {
+        console.log("quote hided");
+        let add = document.querySelector(".add-tag");
+        add.style.display = "none";
+        add.value = "";
+
+        let plus = document.querySelector(".quote-tags-add");
+        plus.style.display = "block";
+
+        isFirstClick = true;
+    }
+
+
+    window.onload = function () {
+        let body = this.document.querySelector("body");
+        body.onclick = function () {
+
+            if (isFirstClick || document.activeElement.classList.contains("form-control")) {
+
+                isFirstClick = false;
+                return;
+            }
+
+            isFirstClick = false;
+
+            let add = document.querySelector(".add-tag");
+            let value = add.firstChild.nextSibling.value;
+            let quote = document.querySelector(".quote-text-content").value;
+
+            console.log("tap on body");
+
+            if (!value) {
+                hideQuote();
+            }
+            else {
+                let newTag = {
+                    tag: value,
+                    quote: quote
+                };
+
+                let responce = fetch("Quotes/AddTag", {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8'
+                    },
+                    tag: value
+                }).then(val => {
+
+                    let tag = document.querySelector(".quote-tag").cloneNode(true);
+                    tag.firstChild.value = value;
+
+                    let tagList = document.querySelector(".quote-tags").firstChild;
+                    tagList.appendChild(tag);
+
+                    hideQuote();
+                    console.log(val);
+                }).catch(err => {
+
+                    console.log(err);
+                })
+
+            }
+
+        }
+
+    }
+
+</script>
