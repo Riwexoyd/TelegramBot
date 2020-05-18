@@ -6,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 using Telegram.Bot;
@@ -16,18 +15,8 @@ namespace AspNetCoreTelegramBot.TextHandlers
     /// <summary>
     /// Обработчик текста для ответа цитатами
     /// </summary>
-    public class QuoteTextHandler : ITextHandler
+    public class QuoteTextHandler : WordTextHandler
     {
-        /// <summary>
-        /// Минимальная длина слова
-        /// </summary>
-        private const int MinWordLength = 3;
-
-        /// <summary>
-        /// Регекс для получения слов из текста
-        /// </summary>
-        private static readonly Regex wordRegex = new Regex(@"[A-Za-zА-Яа-я]+", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-
         private readonly ITelegramBotClient telegramBotClient;
         private readonly ApplicationContext applicationContext;
 
@@ -37,7 +26,7 @@ namespace AspNetCoreTelegramBot.TextHandlers
             this.applicationContext = applicationContext;
         }
 
-        public async Task<bool> HandleAsync(User sender, Chat chat, string text)
+        public override async Task<bool> HandleAsync(User sender, Chat chat, string text)
         {
             var words = GetWordsFromText(text);
             var quotes = await applicationContext.Keywords.Where(i => words.Contains(i.Word))
@@ -57,15 +46,6 @@ namespace AspNetCoreTelegramBot.TextHandlers
                 await telegramBotClient.SendTextMessageAsync(chat.TelegramId, quotes[index].Text);
                 return true;
             }
-        }
-
-        private static IEnumerable<string> GetWordsFromText(string text)
-        {
-            return wordRegex.Matches(text)
-                .Select(i => i.Value.ToLower())
-                .Where(i => i.Length >= MinWordLength)
-                .Distinct()
-                .ToList();
         }
     }
 }
