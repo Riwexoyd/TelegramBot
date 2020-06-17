@@ -48,6 +48,11 @@ namespace AspNetCoreTelegramBot.Database
         public DbSet<RouletteWinner> RouletteWinners { get; set; }
 
         /// <summary>
+        /// Музыка
+        /// </summary>
+        public DbSet<Music> Musics { get; set; }
+
+        /// <summary>
         /// Категории по чатам
         /// </summary>
         public DbSet<RouletteCategoryChat> RouletteCategoryChats { get; set; }
@@ -68,6 +73,7 @@ namespace AspNetCoreTelegramBot.Database
             modelBuilder.ApplyConfiguration(new RouletteCategoryConfiguration());
             modelBuilder.ApplyConfiguration(new RouletteCategoryChatConfiguration());
             modelBuilder.ApplyConfiguration(new RouletteWinnerConfiguration());
+            modelBuilder.ApplyConfiguration(new MusicConfiguration());
         }
     }
 }

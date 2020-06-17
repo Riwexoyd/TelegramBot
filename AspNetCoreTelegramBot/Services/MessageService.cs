@@ -5,7 +5,6 @@ using AspNetCoreTelegramBot.Helpers;
 using System;
 using System.Threading.Tasks;
 
-using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 
@@ -19,17 +18,14 @@ namespace AspNetCoreTelegramBot.Services
         private readonly ApplicationContext applicationContext;
         private readonly ICommandService commandService;
         private readonly ITextHandlerService textHandlerService;
-        private readonly ITelegramBotClient telegramBotClient;
 
         public MessageService(ApplicationContext applicationContext,
             ICommandService commandService,
-            ITextHandlerService textHandlerService,
-            ITelegramBotClient telegramBotClient)
+            ITextHandlerService textHandlerService)
         {
             this.applicationContext = applicationContext;
             this.commandService = commandService;
             this.textHandlerService = textHandlerService;
-            this.telegramBotClient = telegramBotClient;
         }
 
         /// <summary>
@@ -71,25 +67,8 @@ namespace AspNetCoreTelegramBot.Services
             //  если проходит паттерн команды
             if (commandService.IsCommand(message.Text))
             {
-                if (commandService.ContainsCommand(message.Text))
-                {
-                    var command = commandService.GetCommand(message.Text);
-                    if (commandService.CanExecuteCommand(command, chat, out string errorMessage))
-                    {
-                        await command.ExecuteAsync(user, chat);
-                    }
-                    else
-                    {
-                        await telegramBotClient.SendTextMessageAsync(chat.TelegramId, errorMessage);
-                        throw new OperationCanceledException(errorMessage);
-                    }
-                }
-                else
-                {
-                    string unknownCommandMessage = $"Unknown command: {message.Text}";
-                    await telegramBotClient.SendTextMessageAsync(chat.TelegramId, unknownCommandMessage);
-                    throw new ArgumentException(unknownCommandMessage);
-                }
+                //  обрабатываем команду
+                await commandService.HandleTextCommand(user, chat, message.Text);
             }
             else
             {

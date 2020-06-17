@@ -16,11 +16,11 @@ namespace AspNetCoreTelegramBot.Commands
     /// Покинуть рулетку
     /// </summary>
     [CommandChatType(ChatType.Group, ChatType.Supergroup)]
-    internal class LeaveRouletteCommand : BotCommand
+    internal class LeaveRouletteCommand : IBotCommand
     {
-        protected override ITelegramBotClient TelegramBotClient { get; }
+        protected ITelegramBotClient TelegramBotClient { get; }
 
-        protected override ApplicationContext ApplicationContext { get; }
+        protected ApplicationContext ApplicationContext { get; }
 
         public LeaveRouletteCommand(ITelegramBotClient telegramBotClient, ApplicationContext applicationContext)
         {
@@ -28,7 +28,7 @@ namespace AspNetCoreTelegramBot.Commands
             ApplicationContext = applicationContext;
         }
 
-        public override async Task ExecuteAsync(User sender, Chat chat)
+        public async Task ExecuteAsync(User sender, Chat chat)
         {
             var userChat = await ApplicationContext.GetUserChatAsync(sender, chat);
             if (!userChat.IsRouletteParticipant)

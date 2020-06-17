@@ -1,5 +1,8 @@
 ﻿namespace AspNetCoreTelegramBot.Enums
 {
+    /// <summary>
+    /// Тип CallBack Query
+    /// </summary>
     public enum CallbackQueryType
     {
         /// <summary>

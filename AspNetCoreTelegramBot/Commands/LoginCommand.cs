@@ -15,13 +15,13 @@ namespace AspNetCoreTelegramBot.Commands
     /// Команда /login
     /// </summary>
     [CommandChatType(ChatType.Private)]
-    internal class LoginCommand : BotCommand
+    internal class LoginCommand : IBotCommand
     {
         private readonly IConfiguration configuration;
 
-        protected override ITelegramBotClient TelegramBotClient { get; }
+        protected ITelegramBotClient TelegramBotClient { get; }
 
-        protected override ApplicationContext ApplicationContext { get; }
+        protected ApplicationContext ApplicationContext { get; }
 
         public LoginCommand(IConfiguration configuration, ITelegramBotClient telegramBotClient, ApplicationContext applicationContext)
         {
@@ -30,7 +30,7 @@ namespace AspNetCoreTelegramBot.Commands
             ApplicationContext = applicationContext;
         }
 
-        public override async Task ExecuteAsync(User sender, Chat chat)
+        public async Task ExecuteAsync(User sender, Chat chat)
         {
             if (string.IsNullOrEmpty(sender.Login))
             {
