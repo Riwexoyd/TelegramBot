@@ -20,7 +20,7 @@ namespace AspNetCoreTelegramBot.Commands
     /// Команда для рулетки
     /// </summary>
     [CommandChatType(ChatType.Group, ChatType.Supergroup)]
-    [Description("Присоединиться к участию в рулетке")]
+    [Description("Запустить рулетку")]
     internal class RouletteCommand : IBotCommand
     {
         private readonly ICallbackQueryService callbackQueryService;

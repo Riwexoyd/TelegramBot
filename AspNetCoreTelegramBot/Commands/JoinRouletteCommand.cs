@@ -5,6 +5,7 @@ using AspNetCoreTelegramBot.Models;
 using AspNetCoreTelegramBot.Models.Extensions;
 
 using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 
 using Telegram.Bot;
@@ -16,6 +17,7 @@ namespace AspNetCoreTelegramBot.Commands
     /// Присоединиться к рулетке
     /// </summary>
     [CommandChatType(ChatType.Group, ChatType.Supergroup)]
+    [Description("Присоединиться к рулетке")]
     internal class JoinRouletteCommand : IBotCommand
     {
         protected ITelegramBotClient TelegramBotClient { get; }
