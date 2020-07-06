@@ -13,7 +13,7 @@ namespace AspNetCoreTelegramBot.TextHandlers
     /// </summary>
     public class GooseTextHandler : WordTextHandler
     {
-        const string Goose = "гус";
+        private const string Goose = "гус";
 
         private readonly ITelegramBotClient telegramBotClient;
         private readonly IGooseService gooseService;

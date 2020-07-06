@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace AspNetCoreTelegramBot.Commands.Extensions
 {
@@ -19,7 +16,17 @@ namespace AspNetCoreTelegramBot.Commands.Extensions
         /// <returns>Имя команды</returns>
         public static string GetCommandName(this IBotCommand botCommand)
         {
-            var className = botCommand.GetType().Name.ToLower();
+            return botCommand.GetType().GetTypeNameAsCommand();
+        }
+
+        /// <summary>
+        /// Получить имя типа как команду
+        /// </summary>
+        /// <param name="botCommandType">Тип команды</param>
+        /// <returns>Имя типа в формате команды</returns>
+        public static string GetTypeNameAsCommand(this Type botCommandType)
+        {
+            var className = botCommandType.Name.ToLower();
             return className.EndsWith(CommandPostfix) ? className.Remove(className.Length - CommandPostfix.Length) : className;
         }
     }

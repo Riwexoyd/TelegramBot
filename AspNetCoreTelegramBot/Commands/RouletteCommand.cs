@@ -6,6 +6,7 @@ using AspNetCoreTelegramBot.Services;
 
 using Microsoft.EntityFrameworkCore;
 
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,6 +20,7 @@ namespace AspNetCoreTelegramBot.Commands
     /// Команда для рулетки
     /// </summary>
     [CommandChatType(ChatType.Group, ChatType.Supergroup)]
+    [Description("Присоединиться к участию в рулетке")]
     internal class RouletteCommand : IBotCommand
     {
         private readonly ICallbackQueryService callbackQueryService;

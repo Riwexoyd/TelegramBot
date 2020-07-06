@@ -3,12 +3,14 @@ using AspNetCoreTelegramBot.Models;
 
 using Microsoft.EntityFrameworkCore;
 
+using System.ComponentModel;
 using System.Threading.Tasks;
 
 using Telegram.Bot;
 
 namespace AspNetCoreTelegramBot.Commands
 {
+    [Description("Тестовая команда")]
     internal class TestCommand : IBotCommand
     {
         protected ITelegramBotClient TelegramBotClient { get; }

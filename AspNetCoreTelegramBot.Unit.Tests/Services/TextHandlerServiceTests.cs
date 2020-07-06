@@ -1,8 +1,11 @@
 ﻿using AspNetCoreTelegramBot.Models;
 using AspNetCoreTelegramBot.Services;
 using AspNetCoreTelegramBot.TextHandlers;
+
 using Moq;
+
 using NUnit.Framework;
+
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -18,27 +21,27 @@ namespace AspNetCoreTelegramBot.Unit.Tests.Services
         /// <summary>
         /// Тестовое сообщение
         /// </summary>
-        const string TestText = "test";
+        private const string TestText = "test";
 
         /// <summary>
         /// Пользователь
         /// </summary>
-        User user;
+        private User user;
 
         /// <summary>
         /// Чат
         /// </summary>
-        Chat chat;
+        private Chat chat;
 
         /// <summary>
         /// Обработчик текстовых сообщений, возвращающий true, т.е. обработавший сообщение
         /// </summary>
-        Mock<ITextHandler> trueHandler;
+        private Mock<ITextHandler> trueHandler;
 
         /// <summary>
         /// Обработчик текстовых сообщений, возвращающий false при обработке сообщения
         /// </summary>
-        Mock<ITextHandler> falseHandler;
+        private Mock<ITextHandler> falseHandler;
 
         /// <summary>
         /// Инициализация перед каждым тестом

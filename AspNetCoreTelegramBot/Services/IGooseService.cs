@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace AspNetCoreTelegramBot.Services
+﻿namespace AspNetCoreTelegramBot.Services
 {
     /// <summary>
     /// Сервис для получения случайного гуся

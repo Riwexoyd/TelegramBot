@@ -4,6 +4,7 @@ using AspNetCoreTelegramBot.Models;
 
 using Microsoft.Extensions.Configuration;
 
+using System.ComponentModel;
 using System.Threading.Tasks;
 
 using Telegram.Bot;
@@ -15,6 +16,7 @@ namespace AspNetCoreTelegramBot.Commands
     /// Команда /login
     /// </summary>
     [CommandChatType(ChatType.Private)]
+    [Description("Получить логин для входа в панель управления")]
     internal class LoginCommand : IBotCommand
     {
         private readonly IConfiguration configuration;

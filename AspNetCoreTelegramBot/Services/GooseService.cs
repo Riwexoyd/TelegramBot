@@ -128,7 +128,8 @@ namespace AspNetCoreTelegramBot.Services
 ░░░░▐░░░░░▐░▌░▌▒▒▐░▐░▌░░░░░▌░░░░
 "
         };
-        static readonly Random random = new Random();
+
+        private static readonly Random random = new Random();
 
         public string GetRandomGoose()
         {

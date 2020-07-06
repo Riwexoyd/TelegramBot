@@ -88,7 +88,7 @@ namespace AspNetCoreTelegramBot.Services
         private bool CanExecuteCommand(IBotCommand command, Chat chat, out string errorMessage)
         {
             var attributes = command.GetType().GetCustomAttributes(false);
-            foreach (CommandChatTypeAttribute commandChatType in attributes)
+            foreach (CommandChatTypeAttribute commandChatType in attributes.OfType<CommandChatTypeAttribute>())
             {
                 if (commandChatType.ChatTypes.All(i => i != chat.TelegramChatType))
                 {
@@ -104,7 +104,6 @@ namespace AspNetCoreTelegramBot.Services
             errorMessage = string.Empty;
             return true;
         }
-
 
         /// <summary>
         /// Обработать текстовую команду

@@ -5,6 +5,7 @@ using AspNetCoreTelegramBot.Models;
 using AspNetCoreTelegramBot.Models.Extensions;
 
 using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 
 using Telegram.Bot;
@@ -16,6 +17,7 @@ namespace AspNetCoreTelegramBot.Commands
     /// Покинуть рулетку
     /// </summary>
     [CommandChatType(ChatType.Group, ChatType.Supergroup)]
+    [Description("Покинуть участие в рулетке")]
     internal class LeaveRouletteCommand : IBotCommand
     {
         protected ITelegramBotClient TelegramBotClient { get; }

@@ -1,9 +1,9 @@
 ﻿using AspNetCoreTelegramBot.Database;
 using AspNetCoreTelegramBot.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+
+using System.ComponentModel;
 using System.Threading.Tasks;
+
 using Telegram.Bot;
 
 namespace AspNetCoreTelegramBot.Commands
@@ -11,6 +11,7 @@ namespace AspNetCoreTelegramBot.Commands
     /// <summary>
     /// Дэдлайн
     /// </summary>
+    [Description("Узнать время до ближайшего дэдлайна")]
     internal class DeadLineCommand : IBotCommand
     {
         protected ITelegramBotClient TelegramBotClient { get; }
