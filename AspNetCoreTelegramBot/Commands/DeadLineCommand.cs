@@ -13,11 +13,6 @@ namespace AspNetCoreTelegramBot.Commands
     /// </summary>
     internal class DeadLineCommand : IBotCommand
     {
-        /// <summary>
-        /// Дата защиты диплома
-        /// </summary>
-        private readonly DateTime Defense = new DateTime(2020, 07, 6);
-
         protected ITelegramBotClient TelegramBotClient { get; }
 
         protected ApplicationContext ApplicationContext { get; }
@@ -30,10 +25,7 @@ namespace AspNetCoreTelegramBot.Commands
 
         public async Task ExecuteAsync(User sender, Chat chat)
         {
-            var currentDate = DateTime.Now.Date;
-            var defenseTimeSpan = Defense - currentDate;
-
-            await TelegramBotClient.SendTextMessageAsync(chat.TelegramId, $"До защиты: {defenseTimeSpan.Days} дней");
+            await TelegramBotClient.SendTextMessageAsync(chat.TelegramId, $"Команда в разработке");
         }
     }
 }
