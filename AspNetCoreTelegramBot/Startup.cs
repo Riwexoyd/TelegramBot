@@ -65,6 +65,8 @@ namespace AspNetCoreTelegramBot
             services.AddTransient<ICallbackQueryService, CallbackQueryService>();
             services.AddSingleton<IAuthService, AuthService>();
             services.AddSingleton<IGooseService, GooseService>();
+            services.AddSingleton<IHttpDownloadService, HttpDownloadService>();
+            services.AddSingleton<INickNameGeneratorService, NickNameGeneratorService>();
 
             RegisterAsTransient<IBotCommand>(services);
             RegisterAsTransient<ITextHandler>(services);
