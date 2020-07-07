@@ -40,7 +40,7 @@ namespace AspNetCoreTelegramBot.Controllers
         /// <param name="update"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody]Update update)
+        public async Task<IActionResult> Post([FromBody] Update update)
         {
             await updateService.HandleUpdateAsync(update);
             return Ok();

@@ -4,6 +4,7 @@ using AspNetCoreTelegramBot.Models;
 
 using Microsoft.Extensions.Configuration;
 
+using System.ComponentModel;
 using System.Threading.Tasks;
 
 using Telegram.Bot;
@@ -15,13 +16,14 @@ namespace AspNetCoreTelegramBot.Commands
     /// Команда /login
     /// </summary>
     [CommandChatType(ChatType.Private)]
-    internal class LoginCommand : BotCommand
+    [Description("Получить логин для входа в панель управления")]
+    internal class LoginCommand : IBotCommand
     {
         private readonly IConfiguration configuration;
 
-        protected override ITelegramBotClient TelegramBotClient { get; }
+        protected ITelegramBotClient TelegramBotClient { get; }
 
-        protected override ApplicationContext ApplicationContext { get; }
+        protected ApplicationContext ApplicationContext { get; }
 
         public LoginCommand(IConfiguration configuration, ITelegramBotClient telegramBotClient, ApplicationContext applicationContext)
         {
@@ -30,7 +32,7 @@ namespace AspNetCoreTelegramBot.Commands
             ApplicationContext = applicationContext;
         }
 
-        public override async Task ExecuteAsync(User sender, Chat chat)
+        public async Task ExecuteAsync(User sender, Chat chat)
         {
             if (string.IsNullOrEmpty(sender.Login))
             {

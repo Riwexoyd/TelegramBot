@@ -6,6 +6,7 @@ using AspNetCoreTelegramBot.Services;
 
 using Microsoft.EntityFrameworkCore;
 
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,11 +20,12 @@ namespace AspNetCoreTelegramBot.Commands
     /// Команда для рулетки
     /// </summary>
     [CommandChatType(ChatType.Group, ChatType.Supergroup)]
-    internal class RouletteCommand : BotCommand
+    [Description("Запустить рулетку")]
+    internal class RouletteCommand : IBotCommand
     {
         private readonly ICallbackQueryService callbackQueryService;
-        protected override ITelegramBotClient TelegramBotClient { get; }
-        protected override ApplicationContext ApplicationContext { get; }
+        protected ITelegramBotClient TelegramBotClient { get; }
+        protected ApplicationContext ApplicationContext { get; }
 
         public RouletteCommand(ICallbackQueryService callbackQueryService,
             ITelegramBotClient telegramBotClient,
@@ -34,7 +36,7 @@ namespace AspNetCoreTelegramBot.Commands
             ApplicationContext = applicationContext;
         }
 
-        public override async Task ExecuteAsync(User sender, Chat chat)
+        public async Task ExecuteAsync(User sender, Chat chat)
         {
             var categories = await ApplicationContext.RouletteCategories
                 .Where(i => i.IsPublic || i.RouletteCategoryChats.Any(j => j.Chat == chat))

@@ -1,8 +1,5 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Logging;
-
-using NLog.Web;
 
 namespace AspNetCoreTelegramBot
 {
@@ -15,12 +12,13 @@ namespace AspNetCoreTelegramBot
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
-                .ConfigureLogging(logging =>
-                {
-                    logging.ClearProviders();
-                    logging.SetMinimumLevel(LogLevel.Trace);
-                })
-                .UseNLog();
+                .UseStartup<Startup>();
+
+        //.ConfigureLogging(logging =>
+        //{
+        //    logging.ClearProviders();
+        //    logging.SetMinimumLevel(LogLevel.Trace);
+        //})
+        //.UseNLog();
     }
 }

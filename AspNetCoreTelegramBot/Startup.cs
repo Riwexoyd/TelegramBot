@@ -28,17 +28,9 @@ namespace AspNetCoreTelegramBot
         /// </summary>
         public IConfiguration Configuration { get; }
 
-        /// <summary>
-        /// Логгер
-        /// </summary>
-        public NLog.Logger Logger { get; }
-
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-
-            Logger = NLog.LogManager.LoadConfiguration("./Configuration/NLog.config")
-                .GetCurrentClassLogger();
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -60,18 +52,19 @@ namespace AspNetCoreTelegramBot
             services.AddDbContext<ApplicationContext>(options =>
                 options.UseNpgsql(GetConnectionString()));
 
-            Logger.Info("Setting token");
+            //  регистрируем сервисы
             var token = Configuration.GetValue<string>("TOKEN");
             ExceptionHelper.ThrowIfNullOrEmpty(token, "TOKEN");
-
-            //  регистрируем сервисы
             services.AddSingleton<ITelegramBotClient>(i => new TelegramBotClient(token));
+            services.AddHostedService<BotSettingsService>();
+
             services.AddTransient<ITextHandlerService, TextHandlerService>();
             services.AddTransient<ICommandService, CommandService>();
             services.AddTransient<IUpdateService, UpdateService>();
             services.AddTransient<IMessageService, MessageService>();
             services.AddTransient<ICallbackQueryService, CallbackQueryService>();
             services.AddSingleton<IAuthService, AuthService>();
+            services.AddSingleton<IGooseService, GooseService>();
 
             RegisterAsTransient<IBotCommand>(services);
             RegisterAsTransient<ITextHandler>(services);
@@ -79,7 +72,7 @@ namespace AspNetCoreTelegramBot
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ITelegramBotClient telegramBot)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -103,14 +96,6 @@ namespace AspNetCoreTelegramBot
                 endpoints.MapControllerRoute(name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
             });
-
-            //  регистрируем бота и устанавливаем webhook
-            Logger.Info("Setting webhooks");
-            var domain = Configuration.GetValue<string>("DOMAIN");
-            ExceptionHelper.ThrowIfNullOrEmpty(domain, "DOMAIN");
-
-            string hook = $"{domain}/api/message";
-            telegramBot.SetWebhookAsync(hook).Wait();
         }
 
         /// <summary>

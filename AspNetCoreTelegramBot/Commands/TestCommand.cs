@@ -3,17 +3,19 @@ using AspNetCoreTelegramBot.Models;
 
 using Microsoft.EntityFrameworkCore;
 
+using System.ComponentModel;
 using System.Threading.Tasks;
 
 using Telegram.Bot;
 
 namespace AspNetCoreTelegramBot.Commands
 {
-    internal class TestCommand : BotCommand
+    [Description("Тестовая команда")]
+    internal class TestCommand : IBotCommand
     {
-        protected override ITelegramBotClient TelegramBotClient { get; }
+        protected ITelegramBotClient TelegramBotClient { get; }
 
-        protected override ApplicationContext ApplicationContext { get; }
+        protected ApplicationContext ApplicationContext { get; }
 
         public TestCommand(ITelegramBotClient telegramBotClient, ApplicationContext applicationContext)
         {
@@ -21,7 +23,7 @@ namespace AspNetCoreTelegramBot.Commands
             ApplicationContext = applicationContext;
         }
 
-        public override async Task ExecuteAsync(User sender, Chat chat)
+        public async Task ExecuteAsync(User sender, Chat chat)
         {
             var me = await TelegramBotClient.GetMeAsync();
             await TelegramBotClient.SendTextMessageAsync(chat.TelegramId, $"Bot Info: {me.FirstName} {me.LastName} {me.Username}");
