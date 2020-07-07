@@ -56,10 +56,7 @@ namespace AspNetCoreTelegramBot.Services
             await UpdateCommandsAsync();
         }
 
-        public async Task StopAsync(CancellationToken cancellationToken)
-        {
-            await telegramBotClient.DeleteWebhookAsync();
-        }
+        public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
 
         /// <summary>
         /// Обновить команды бота
