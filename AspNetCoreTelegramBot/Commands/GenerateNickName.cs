@@ -1,6 +1,6 @@
 ﻿using AspNetCoreTelegramBot.Database;
 using AspNetCoreTelegramBot.Models;
-
+using AspNetCoreTelegramBot.Services;
 using System.ComponentModel;
 using System.Threading.Tasks;
 
@@ -18,15 +18,22 @@ namespace AspNetCoreTelegramBot.Commands
 
         private ApplicationContext applicationContext;
 
-        public GenerateNickName(ITelegramBotClient telegramBotClient, ApplicationContext applicationContext)
+        private INickNameGeneratorService nickNameGeneratorService;
+
+        public GenerateNickName(ITelegramBotClient telegramBotClient, 
+            ApplicationContext applicationContext, 
+            INickNameGeneratorService nickNameGeneratorService)
         {
             this.telegramBotClient = telegramBotClient;
             this.applicationContext = applicationContext;
+            this.nickNameGeneratorService = nickNameGeneratorService;
         }
 
         public async Task ExecuteAsync(User sender, Chat chat)
         {
-            await telegramBotClient.SendTextMessageAsync(chat.TelegramId, "В разработке...");
+            var nickName = nickNameGeneratorService.GenerateNickName(null);
+            var info = nickNameGeneratorService.GetNickNameInformation(nickName);
+            await telegramBotClient.SendTextMessageAsync(chat.TelegramId, $"Ник: {nickName}\n{info}");
         }
     }
 }
