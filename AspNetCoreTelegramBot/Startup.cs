@@ -57,6 +57,7 @@ namespace AspNetCoreTelegramBot
             ExceptionHelper.ThrowIfNullOrEmpty(token, "TOKEN");
             services.AddSingleton<ITelegramBotClient>(i => new TelegramBotClient(token));
             services.AddHostedService<BotSettingsService>();
+            services.AddHostedService<NickNameGeneratorInitializeService>();
 
             services.AddTransient<ITextHandlerService, TextHandlerService>();
             services.AddTransient<ICommandService, CommandService>();

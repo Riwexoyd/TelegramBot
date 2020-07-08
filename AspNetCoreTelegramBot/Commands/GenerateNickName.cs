@@ -31,8 +31,9 @@ namespace AspNetCoreTelegramBot.Commands
 
         public async Task ExecuteAsync(User sender, Chat chat)
         {
-            await nickNameGeneratorService.GenerateNickName();
-            await telegramBotClient.SendTextMessageAsync(chat.TelegramId, "В разработке...");
+            var nickName = nickNameGeneratorService.GenerateNickName(null);
+            var info = nickNameGeneratorService.GetNickNameInformation(nickName);
+            await telegramBotClient.SendTextMessageAsync(chat.TelegramId, $"Ник: {nickName}\n{info}");
         }
     }
 }

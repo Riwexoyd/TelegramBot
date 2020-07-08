@@ -13,15 +13,16 @@ namespace AspNetCoreTelegramBot.Services
         /// <summary>
         /// Сгенерировать ник
         /// </summary>
+        /// <param name="chars">Символы для начала</param>
         /// <returns>Сгенерированный ник</returns>
-        Task<string> GenerateNickName();
+        string GenerateNickName(char[] chars);
 
         /// <summary>
         /// Получить информацию о нике
         /// </summary>
         /// <param name="nickName">Ник</param>
         /// <returns>Информация</returns>
-        Task<string> GetNickNameInformation(string nickName);
+        string GetNickNameInformation(string nickName);
 
         /// <summary>
         /// Инициализировать генератор
