@@ -1,12 +1,13 @@
 ﻿using AspNetCoreTelegramBot.Extensions;
 
+using Microsoft.Extensions.Logging;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace AspNetCoreTelegramBot.Services
@@ -21,16 +22,18 @@ namespace AspNetCoreTelegramBot.Services
         private readonly char[] symbols = new char[] { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
         private readonly char[] vowels = new char[] { 'a', 'e', 'i', 'o', 'u', 'y' };
 
-        private Random rand = new Random();
-        private Dictionary<char, HashSet<string>> parts = new Dictionary<char, HashSet<string>>();
-        private HashSet<string> hashWords = new HashSet<string>();
+        private readonly Random rand = new Random();
+        private readonly Dictionary<char, HashSet<string>> parts = new Dictionary<char, HashSet<string>>();
+        private readonly HashSet<string> hashWords = new HashSet<string>();
         private bool initialized = false;
 
-        private IHttpDownloadService httpDownloadService;
+        private readonly IHttpDownloadService httpDownloadService;
+        private readonly ILogger<NickNameGeneratorService> logger;
 
-        public NickNameGeneratorService(IHttpDownloadService httpDownloadService)
+        public NickNameGeneratorService(IHttpDownloadService httpDownloadService, ILogger<NickNameGeneratorService> logger)
         {
             this.httpDownloadService = httpDownloadService;
+            this.logger = logger;
         }
 
         /// <summary>
@@ -44,9 +47,10 @@ namespace AspNetCoreTelegramBot.Services
                 return;
             }
 
+            logger.LogInformation("Initialize NickNameGenerator");
+
             var archivePath = await httpDownloadService.DownloadFile(Url);
             var dir = UnZip(archivePath);
-            File.Delete(archivePath);
 
             var path = Path.Combine(dir, ArchiveDirectoryName, FileName);
 
@@ -65,6 +69,18 @@ namespace AspNetCoreTelegramBot.Services
                 }
                 hashWords.Add(word.ToLower());
             }
+
+            try
+            {
+                File.Delete(archivePath);
+                Directory.Delete(dir, true);
+            }
+            catch (Exception e)
+            {
+                logger.LogError(e, "NickNameGenerator Cleanup Error");
+            }
+
+            logger.LogInformation("Initialize NickNameGenerator Complete");
 
             initialized = true;
         }
@@ -104,7 +120,7 @@ namespace AspNetCoreTelegramBot.Services
                 }
                 else
                 {
-                    parts.Add(word.Substring(lastIndex, word.Length - lastIndex));
+                    parts.Add(word[lastIndex..]);
                 }
             }
 
@@ -146,14 +162,13 @@ namespace AspNetCoreTelegramBot.Services
             builder.Append(char.ToUpper(chars[rand.Next(chars.Length)]));
             while (builder.Length < length)
             {
-                var last = char.ToLower(builder[builder.Length - 1]);
+                var last = char.ToLower(builder[^1]);
                 var pairs = parts[last].ToList();
                 string part = null;
-                while (string.IsNullOrEmpty(part)
-                    || vowels.Contains(last) && vowels.Contains(part[0])
-                    || builder.Length + part.Length > length + 2)
+                while (string.IsNullOrEmpty(part))
                 {
-                    part = pairs[rand.Next(pairs.Count)];
+                    var correctParts = pairs.Where(i => i.Length <= length - builder.Length).ToList();
+                    part = correctParts[rand.Next(correctParts.Count)];
                 }
 
                 builder.Append(part);
@@ -166,7 +181,9 @@ namespace AspNetCoreTelegramBot.Services
         {
             nickName = nickName.ToLower();
             return !ContainsThreeAndMoreSameSymbols(nickName)
-                && LessOrEqualTwo(nickName);
+                && LessOrEqualTwo(nickName)
+                && !ContainsThreeAndMoreSameTypeSymbols(nickName)
+                && CheckCharLimits(nickName);
         }
 
         private bool ContainsThreeAndMoreSameSymbols(string nickName)
@@ -193,6 +210,34 @@ namespace AspNetCoreTelegramBot.Services
             return false;
         }
 
+        /// <summary>
+        /// Проверить, есть ли в нике подрят 3 и больше согласных/гласных букв
+        /// </summary>
+        /// <param name="nickName">Ник</param>
+        /// <returns>True, если содержит, иначе False</returns>
+        private bool ContainsThreeAndMoreSameTypeSymbols(string nickName)
+        {
+            for (int i = 0; i < nickName.Length - 2; ++i)
+            {
+                if (IsVowel(nickName[i]) == IsVowel(nickName[i + 1]) && IsVowel(nickName[i + 1]) == IsVowel(nickName[i + 2]))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Проверить лимит одинаковых символов в строке
+        /// </summary>
+        /// <param name="nickName">Ник</param>
+        /// <returns>Если какой-нибудь символ встречается более 3х раз в нике, то возвращается False; Иначе true.</returns>
+        private bool CheckCharLimits(string nickName)
+        {
+            return !(nickName.GroupBy(i => i).Max(i => i.Count()) > 3);
+        }
+
         private bool LessOrEqualTwo(string name)
         {
             List<int> positions = new List<int>();
@@ -204,13 +249,13 @@ namespace AspNetCoreTelegramBot.Services
                 }
             }
 
-            Func<bool> func = () =>
+            bool CheckFunction()
             {
                 if (positions.Count < 2) return false;
                 return !(positions[1] - positions[0] > 2);
-            };
+            }
 
-            return positions.Count <= 2 && !func();
+            return positions.Count <= 2 && !CheckFunction();
         }
 
         /// <summary>
@@ -234,7 +279,9 @@ namespace AspNetCoreTelegramBot.Services
                 }
 
                 if ((float)count / name.Length >= 0.6)
+                {
                     similar.Add(word);
+                }
             }
 
             return similar.Count == 0;
@@ -289,6 +336,16 @@ namespace AspNetCoreTelegramBot.Services
             }
 
             return info.ToString();
+        }
+
+        /// <summary>
+        /// Проверить, является ли символ гласной буквой
+        /// </summary>
+        /// <param name="symb">Символ</param>
+        /// <returns>True, если гласная; Иначе False.</returns>
+        private bool IsVowel(char symb)
+        {
+            return vowels.Contains(symb);
         }
     }
 }

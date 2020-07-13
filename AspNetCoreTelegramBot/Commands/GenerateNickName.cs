@@ -1,6 +1,7 @@
 ﻿using AspNetCoreTelegramBot.Database;
 using AspNetCoreTelegramBot.Models;
 using AspNetCoreTelegramBot.Services;
+
 using System.ComponentModel;
 using System.Threading.Tasks;
 
@@ -14,14 +15,14 @@ namespace AspNetCoreTelegramBot.Commands
     [Description("Сгенерировать NickName")]
     public class GenerateNickName : IBotCommand
     {
-        private ITelegramBotClient telegramBotClient;
+        private readonly ITelegramBotClient telegramBotClient;
 
-        private ApplicationContext applicationContext;
+        private readonly ApplicationContext applicationContext;
 
-        private INickNameGeneratorService nickNameGeneratorService;
+        private readonly INickNameGeneratorService nickNameGeneratorService;
 
-        public GenerateNickName(ITelegramBotClient telegramBotClient, 
-            ApplicationContext applicationContext, 
+        public GenerateNickName(ITelegramBotClient telegramBotClient,
+            ApplicationContext applicationContext,
             INickNameGeneratorService nickNameGeneratorService)
         {
             this.telegramBotClient = telegramBotClient;
