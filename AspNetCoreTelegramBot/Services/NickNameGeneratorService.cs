@@ -158,7 +158,7 @@ namespace AspNetCoreTelegramBot.Services
         private string Build(char[] chars)
         {
             var builder = new StringBuilder();
-            int length = 5 + rand.Next(10);
+            int length = 7 + rand.Next(10);
             builder.Append(char.ToUpper(chars[rand.Next(chars.Length)]));
             while (builder.Length < length)
             {
