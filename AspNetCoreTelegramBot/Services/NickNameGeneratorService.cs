@@ -158,7 +158,7 @@ namespace AspNetCoreTelegramBot.Services
         private string Build(char[] chars)
         {
             var builder = new StringBuilder();
-            int length = 7 + rand.Next(10);
+            int length = 7 + rand.Next(8);
             builder.Append(char.ToUpper(chars[rand.Next(chars.Length)]));
             while (builder.Length < length)
             {
@@ -183,7 +183,9 @@ namespace AspNetCoreTelegramBot.Services
             return !ContainsThreeAndMoreSameSymbols(nickName)
                 && LessOrEqualTwo(nickName)
                 && !ContainsThreeAndMoreSameTypeSymbols(nickName)
-                && CheckCharLimits(nickName);
+                && CheckCharLimits(nickName)
+                && !ThreeOrMoreSameChars(nickName)
+                && !StartWithTwoConsonants(nickName);
         }
 
         private bool ContainsThreeAndMoreSameSymbols(string nickName)
@@ -285,6 +287,42 @@ namespace AspNetCoreTelegramBot.Services
             }
 
             return similar.Count == 0;
+        }
+
+        private bool ThreeOrMoreSameChars(string nickName)
+        {
+            for (int i = 0; i < nickName.Length; ++i)
+            {
+                var symb = nickName[i];
+                var vowel = IsVowel(symb);
+                var count = 1;
+                for (int j = i + 1; j < nickName.Length; ++j)
+                {
+                    if (vowel != IsVowel(nickName[j]))
+                    {
+                        continue;
+                    }
+                    if (nickName[j] == symb)
+                    {
+                        ++count;
+                        if (count >= 3)
+                        {
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        private bool StartWithTwoConsonants(string nickName)
+        {
+            return !IsVowel(nickName[0]) && !IsVowel(nickName[1]);
         }
 
         /// <summary>
